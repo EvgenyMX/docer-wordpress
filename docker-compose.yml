@@ -1,0 +1,58 @@
+version: '3.9'
+services:
+  nginx:
+    image: nginx
+    restart: unless-stopped
+    env_file:
+      - ./.srv/.env
+    ports:
+      - 8088:80
+    volumes:
+      - ./.srv/nginx:/etc/nginx/conf.d:rw
+
+  mysql:
+    image: mysql:5.7
+    restart: always
+    ports:
+      - 3306:3306
+    volumes:
+      - "./.srv/database:/var/lib/mysql"
+    environment:
+      MYSQL_DATABASE: metest
+      MYSQL_USER: metest
+      MYSQL_PASSWORD: metest
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+
+  wordpress:
+    image: wordpress:latest
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    ports:
+      - 8080:80
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: mysql:3306
+      WORDPRESS_DB_USER: metest
+      WORDPRESS_DB_PASSWORD: metest
+      WORDPRESS_DB_NAME: metest
+      WORDPRESS_DEBUG: 1
+    volumes:
+      - ./.srv/wordpress/:/var/www/html
+      - ./theme/:/var/www/html/wp-content/themes/me
+      - ./plugin-one/:/var/www/html/wp-content/plugins/pkg
+      - ./.srv/custom.ini:/usr/local/etc/php/conf.d/custom.ini
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    ports:
+      - 8181:80
+    environment:
+      MYSQL_USERNAME: metest
+      MYSQL_PASSWORD: metest
+      PMA_HOST: mysql
