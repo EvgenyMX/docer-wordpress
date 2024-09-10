@@ -18,10 +18,12 @@ services:
     volumes:
       - "./.srv/database:/var/lib/mysql"
     environment:
-      MYSQL_DATABASE: metest
-      MYSQL_USER: metest
-      MYSQL_PASSWORD: metest
+      MYSQL_DATABASE: x1team
+      MYSQL_USER: x1team
+      MYSQL_PASSWORD: x1team
       MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+
 
   wordpress:
     image: wordpress:latest
@@ -31,19 +33,21 @@ services:
       - mysql
     ports:
       - 8080:80
+      - 443:443
     restart: always
     environment:
       WORDPRESS_DB_HOST: mysql:3306
-      WORDPRESS_DB_USER: metest
-      WORDPRESS_DB_PASSWORD: metest
-      WORDPRESS_DB_NAME: metest
+      WORDPRESS_DB_USER: x1team
+      WORDPRESS_DB_PASSWORD: x1team
+      WORDPRESS_DB_NAME: x1team
       WORDPRESS_DEBUG: 1
     volumes:
       - ./.srv/wordpress/:/var/www/html
       - ./theme/:/var/www/html/wp-content/themes/me
       - ./plugin-one/:/var/www/html/wp-content/plugins/pkg
       - ./.srv/custom.ini:/usr/local/etc/php/conf.d/custom.ini
-
+      - ./logs:/var/www/html/wp-content/logs
+      - ./error-logging.ini:/usr/local/etc/php/conf.d/error-logging.ini
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     depends_on:
@@ -53,6 +57,6 @@ services:
     ports:
       - 8181:80
     environment:
-      MYSQL_USERNAME: metest
-      MYSQL_PASSWORD: metest
+      MYSQL_USERNAME: x1team
+      MYSQL_PASSWORD: x1team
       PMA_HOST: mysql
